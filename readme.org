@@ -90,8 +90,8 @@ There are multiple ways of uploading your code and data.
     source deactivate pytorch
     #+END_SRC
 3. Prepere your code.    You need to add the following in your code:
-   a. Python exmaple: =i = int(os.environ["SLURM_ARRAY_TASK_ID"])=
-   b. Matlab example: =i=str2num(getenv('SLURM_ARRAY_TASK_ID'));=
+   - Python exmaple: =i = int(os.environ["SLURM_ARRAY_TASK_ID"])=
+   - Matlab example: =i=str2num(getenv('SLURM_ARRAY_TASK_ID'));=
 
    This basically load the variable =SLURM_ARRAY_TASK_ID= into your file. This will be used as a seed in your random number generator in your simulation study.
 4. Please remember to save the files with the =i= in your file name so each node is saving into different file name.
