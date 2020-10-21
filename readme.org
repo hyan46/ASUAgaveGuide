@@ -1,0 +1,110 @@
+#+TITLE: Guide to Agave Cluster
+#+ROAM_ALIAS:
+#+ROAM_TAGS:
+#+CREATED: [2020-10-20 Tue 16:47]
+#+LAST_MODIFIED: [2020-10-20 Tue 17:51]
+
+
+The information of the guideline can be found in [[https://cores.research.asu.edu/research-computing/getting-started][Research Computing | Get Started | Core Facilities]]
+
+* Login to the Agave cluster
+#+BEGIN_SRC sh
+ssh ASURITE@agave.asu.edu
+#+END_SRC
+Please replace the ASURITE with your ASU ID.
+After that you will be login to the =Login Node=, which is a node to set up your enviornment and submit jobs, not for computing!
+
+
+* Prepare your environment (Optional, Only for Python)
+ Follow the guideline: [[https://asurc.atlassian.net/wiki/spaces/RC/pages/125829137/Using+anaconda+environments][Using anaconda environments - Research Computing - ASU Research Computing Confluence]]
+
+1. Run the following commands to create environment
+   #+BEGIN_SRC sh
+   module load anaconda/py3
+   conda create -n ENV_NAME  # Create a new environment
+   #+END_SRC
+
+ 2. Install your environment with required packages
+  #+BEGIN_SRC sh
+  source activate ENV_NAME
+  conda install numpy # Install all pacakge you need
+  #+END_SRC
+
+* Upload your code and data
+There are multiple ways of uploading your code and data.
+
+1. You can use =dropbox= to upload the files to the server.
+    Here is the guide of using Dropbox.
+    [[https://asurc.atlassian.net/wiki/spaces/RC/pages/67534849/Dropbox+Uploader][Dropbox Uploader - Research Computing - ASU Research Computing Confluence]]
+
+2. To use command line =scp=, you can use the following (LINUX or Mac only)
+    #+BEGIN_SRC bash
+    scp PATH_TO_YOUR_FILE ASURITE@agave.asu.edu:~
+    #+END_SRC
+    Please change the PATH_TO_YOUR_FILE with the file with your names.
+
+3. Use software that supports sftp
+   Examples:
+   - Use WinSCP in windows
+   - Use Fugu or CyberDuck for mac
+4. Use git
+   You can use =git clone= to get the code from the repository, which is generally recommended for code upload.
+* Prepare your code with additional bash file
+1. You need to prepare a bash file =run.sh= to be able to submit the code.
+
+   Here are some examples Here are some explanations
+   + #SBATCH --mem-per-cpu=512 # Specify the memory per each node, here is 512MB
+   + #SBATCH --job-name='test' # Name of your job, can change
+   + #SBATCH --error=job.%J.err  # Error files output, can leave as it is
+   + #SBATCH --output=job.%J.out  # files standard output, can leave as it is
+   + #SBATCH --array 1-10        # Important, change as you needed, this says how many iterations it will run. In general, this number will be passed into each computation node with the variable =SLURM_ARRAY_TASK_ID= in your code.
+2. =run.sh= file examples
+   a. MATLAB example
+    #+BEGIN_SRC bash
+     #!/bin/sh
+     #SBATCH --mem-per-cpu=512
+     #SBATCH --job-name='test'
+     #SBATCH --error=job.%J.err
+     #SBATCH --output=job.%J.out
+     #SBATCH --array 1-3
+
+     module load matlab/2016a
+     matlab -nodisplay -r "run, quit"
+    #+END_SRC
+    This is similar as above.
+   b. Python example
+
+    #+BEGIN_SRC bash
+    #!/bin/sh
+    #SBATCH --mem-per-cpu=512
+    #SBATCH --job-name='test'
+    #SBATCH --error=job.%J.err
+    #SBATCH --output=job.%J.out
+    #SBATCH --array 1-10
+
+    module purge  # Always purge modules to ensure consistent environments
+    # Load required modules for job's environment
+    module load anaconda/py3
+    source activate pytorch
+    python test.py
+    source deactivate pytorch
+    #+END_SRC
+3. Prepere your code.
+   You need to add the following in your code:
+   a. Python exmaple: =i = int(os.environ["SLURM_ARRAY_TASK_ID"])=
+   b. Matlab example: =i=str2num(getenv('SLURM_ARRAY_TASK_ID'));=
+
+   This basically load the variable =SLURM_ARRAY_TASK_ID= into your file. This will be used as a seed in your random number generator in your simulation study.
+4. Please remember to save the files with the =i= in your file name so each node is saving into different file name.
+* Submit your code
+#+BEGIN_SRC sh
+sbatch run.sh
+#+END_SRC
+This will submit the code with diffurent =SLURM_ARRAY_TASK_ID= into different computational nodes.
+* Check you code status
+You can use =squeue= to check the status of all jobs
+It is often convinient to search only your jobs by
+=squeue|grep ASURITE=. Please replace the ASURITE with your ASU ID.
+
+* Collect results
+Please go into the saved files to check results. If the saved files are not generated or the result is not correct. Please check in =job.ID.err= to see if there are any errors showing up.
