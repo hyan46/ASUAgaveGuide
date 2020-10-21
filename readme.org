@@ -89,8 +89,7 @@ There are multiple ways of uploading your code and data.
     python test.py
     source deactivate pytorch
     #+END_SRC
-3. Prepere your code.
-   You need to add the following in your code:
+3. Prepere your code.    You need to add the following in your code:
    a. Python exmaple: =i = int(os.environ["SLURM_ARRAY_TASK_ID"])=
    b. Matlab example: =i=str2num(getenv('SLURM_ARRAY_TASK_ID'));=
 
