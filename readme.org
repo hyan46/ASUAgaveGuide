@@ -24,7 +24,7 @@ After that you will be login to the =Login Node=, which is a node to set up your
    conda create -n ENV_NAME  # Create a new environment
    #+END_SRC
 
- 2. Install your environment with required packages
+2. Install your environment with required packages
   #+BEGIN_SRC sh
   source activate ENV_NAME
   conda install numpy # Install all pacakge you need
